@@ -18,7 +18,7 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const crypto = require("crypto");
-const { WITNESSES, DIFFICULTY } = require("./witnesses");
+const { WITNESSES, DIFFICULTY, BRIEFING } = require("./witnesses");
 
 const app = express();
 app.use(cors());
@@ -175,6 +175,7 @@ app.get("/api/witnesses", (req, res) => {
     totalIntel: TOTAL_INTEL,
     lockMinIntel: LOCK_MIN_INTEL,
     lockRequireAllWitnesses: LOCK_REQUIRE_ALL_WITNESSES,
+    briefing: BRIEFING,
   });
 });
 
