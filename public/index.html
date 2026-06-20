@@ -87,6 +87,7 @@ let DIFFS = {};
 let TOTAL_INTEL = 0;
 let LOCK_MIN_INTEL = 12;
 let LOCK_ALL_WITNESSES = true;
+let BRIEFING = null;
 
 // session
 let SESSION = { code: params.get("code") || "", token: null, name: "", locked: false };
@@ -107,6 +108,7 @@ async function boot(){
     TOTAL_INTEL = d.totalIntel || WITNESSES.reduce((s,w)=>s+w.intel.length,0);
     LOCK_MIN_INTEL = d.lockMinIntel || 12;
     LOCK_ALL_WITNESSES = d.lockRequireAllWitnesses !== false;
+    BRIEFING = d.briefing || null;
     WITNESSES.forEach(w=> state[w.id] = {history:[],trust:w.startTrust,unlocked:[],labels:{},started:false,interviewed:false});
     renderJoin();
   }catch(e){
@@ -216,7 +218,7 @@ function renderHub(){
   root.innerHTML = band(`CASE FILE &nbsp; <b style="color:${tu>=TOTAL_INTEL?GOODGLOW:'#fff'}">${tu} / ${TOTAL_INTEL}</b>`) + `
   <div class="wrap">
     <div style="font-size:15px;color:#cfc9da;margin-bottom:8px;line-height:1.6;">Four witnesses. Choose who to interview. Return to anyone as often as you like — what you've uncovered stays in your file.</div>
-    <div style="font-size:13px;color:var(--mute);margin-bottom:20px;">To accuse, uncover at least <b style="color:#fff">${LOCK_MIN_INTEL} of ${TOTAL_INTEL}</b> clues${LOCK_ALL_WITNESSES?` and <b style="color:#fff">interview all four witnesses</b>`:''}.</div>
+    <div style="font-size:13px;color:var(--mute);margin-bottom:20px;">To accuse, uncover at least <b style="color:#fff">${LOCK_MIN_INTEL} of ${TOTAL_INTEL}</b> clues${LOCK_ALL_WITNESSES?` and <b style="color:#fff">interview all four witnesses</b>`:''}. ${BRIEFING?`<a onclick="showBriefing()" style="color:${GOLD};cursor:pointer;text-decoration:underline;">Re-read the case briefing</a>`:''}</div>
     <div class="grid">
       ${WITNESSES.map(w=>{
         const st = state[w.id];
@@ -466,6 +468,34 @@ function renderLocked(w){
     </div>
     <div style="margin-top:22px;"><button class="btn-ghost" onclick="renderHub()">Review your case file</button></div>
   </div>`;
+}
+
+function showBriefing(){
+  if(!BRIEFING) return;
+  const ov = document.createElement("div");
+  ov.id = "briefing-ov";
+  ov.style.cssText = "position:fixed;inset:0;background:rgba(5,4,8,.82);z-index:50;display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:30px 16px;";
+  ov.onclick = (e)=>{ if(e.target===ov) ov.remove(); };
+  ov.innerHTML = `<div style="max-width:680px;width:100%;background:var(--panel2);border:1px solid rgba(193,83,45,.4);border-radius:16px;padding:26px 28px;">
+    <div style="display:flex;justify-content:space-between;align-items:start;gap:16px;margin-bottom:10px;">
+      <div style="font-size:11px;color:${GOLD};font-weight:800;letter-spacing:1.5px;">CASE BRIEFING</div>
+      <button class="btn-ghost" style="padding:6px 14px;font-size:13px;" onclick="document.getElementById('briefing-ov').remove()">Close ✕</button>
+    </div>
+    <div style="font-family:Georgia,serif;font-size:23px;font-weight:800;color:#fff;margin-bottom:8px;">${esc(BRIEFING.headline)}</div>
+    <div style="font-size:15px;color:#cfc9da;line-height:1.6;margin-bottom:16px;">${esc(BRIEFING.lede)}</div>
+    ${BRIEFING.timeline ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+      ${BRIEFING.timeline.map(t=>`<div style="flex:1;min-width:140px;background:rgba(193,83,45,.1);border:1px solid rgba(193,83,45,.3);border-radius:10px;padding:9px 11px;">
+        <div style="font-family:Georgia,serif;font-size:18px;font-weight:800;color:${RUST};">${esc(t.time)}</div>
+        <div style="font-size:11.5px;color:#cfc9da;line-height:1.4;margin-top:3px;">${esc(t.event)}</div>
+      </div>`).join("")}
+    </div>` : ""}
+    <div style="font-size:11px;color:${GOLD};font-weight:700;letter-spacing:1px;margin-bottom:6px;">THE OFFICIAL ACCOUNT</div>
+    ${BRIEFING.whatWeKnow.map(x=>`<div style="font-size:14px;color:#d8d3e4;line-height:1.55;margin-bottom:7px;">• ${esc(x)}</div>`).join("")}
+    <div style="font-size:14px;color:#f0d8ce;line-height:1.55;margin:12px 0;padding:12px 0;border-top:1px solid rgba(255,255,255,.1);border-bottom:1px solid rgba(255,255,255,.1);"><b style="color:#fff;">Your job: </b>${esc(BRIEFING.yourJob)}</div>
+    <div style="font-size:11px;color:${GOLD};font-weight:700;letter-spacing:1px;margin:14px 0 6px;">THE FOUR WITNESSES</div>
+    ${BRIEFING.cast.map(c=>`<div style="margin-bottom:8px;"><span style="font-size:14px;font-weight:700;color:#fff;">${esc(c.name)}</span> <span style="font-size:12.5px;color:#a9a3b8;">— ${esc(c.role)}</span></div>`).join("")}
+  </div>`;
+  document.body.appendChild(ov);
 }
 
 boot();
