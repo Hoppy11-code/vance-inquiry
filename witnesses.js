@@ -255,4 +255,35 @@ HOW YOU BEHAVE:
   },
 ];
 
-module.exports = { WITNESSES, DIFFICULTY, TOTAL_PER_WITNESS };
+// ============================================================
+// CASE BRIEFING — safe scene-setting shown on the teacher board
+// and in each student's app. This is the OFFICIAL story (which is
+// a lie the students must see through). It gives no gated intel:
+// no murder, no Reeve, no override/sedative/data, none of the 16
+// clues. Just the scene, the official ruling, and the cast.
+// ============================================================
+const BRIEFING = {
+  headline: "Earth Command — Inquiry Brief: the death of Dr Elin Vance",
+  lede: "Forty hours ago, the Ares III Mars base lost its lead geologist. Mission Control has ruled it an accident. They want that ruling checked before it goes in the record. This is the official account — part of your job is to test whether it holds.",
+  timeline: [
+    { time: "23:30", event: "Vance last seen alive, leaving the main module alone toward the lab and airlock section." },
+    { time: "≈02:00", event: "Recorded time of death, established from base system logs." },
+    { time: "04:10", event: "Body found in Airlock 3 during a routine maintenance round." },
+  ],
+  whatWeKnow: [
+    "The victim is Dr Elin Vance, the mission's lead geologist.",
+    "Last seen alive at around 23:30 heading toward the airlock section. No one reports seeing her after that.",
+    "Official cause of death: accidental decompression in Airlock 3, attributed to a safety fault that had already been logged on the airlock systems weeks earlier.",
+    "Vance was respected and careful with procedure. Some on the base are uneasy about how neatly the 'accident' explains everything.",
+    "Four crew members were closest to what happened. Each will speak to the inquiry. One of them may not be telling the truth.",
+  ],
+  yourJob: "Interview all four. Earn what they know. Decide for yourself whether this was an accident — or something the official story is covering. Nobody will hand you the answer.",
+  cast: [
+    { name: "Commander Sara Hale", role: "Base Commander — runs the base, carries the mission" },
+    { name: "Yuki Tan", role: "Systems Engineer — maintains every system, including the airlocks" },
+    { name: "Dr Ama Okafor", role: "Base Medic — examined the body" },
+    { name: "Marcus Reeve", role: "Mission Strategist — confident, helpful, and close to Vance's work" },
+  ],
+};
+
+module.exports = { WITNESSES, DIFFICULTY, TOTAL_PER_WITNESS, BRIEFING };
