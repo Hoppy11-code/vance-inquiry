@@ -63,10 +63,10 @@ const PURPLE="#672E8D",GOLD="#A1916A",RUST="#c1532d",GOOD="#46b86a",GOODGLOW="#7
 const view = document.getElementById("view");
 const esc = s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 
-let DIFFS = {}, chosen = "intermediate", session = null, pollTimer = null, lastClose = null;
+let DIFFS = {}, chosen = "intermediate", session = null, pollTimer = null, lastClose = null, BRIEFING = null;
 
 async function boot(){
-  try{ const r = await fetch(API_BASE+"/api/witnesses"); const d = await r.json(); DIFFS = d.difficulties; }
+  try{ const r = await fetch(API_BASE+"/api/witnesses"); const d = await r.json(); DIFFS = d.difficulties; BRIEFING = d.briefing; }
   catch(e){ DIFFS = {beginner:{label:"Beginner",blurb:""},intermediate:{label:"Intermediate",blurb:""},advanced:{label:"Advanced",blurb:""}}; }
   renderSetup();
 }
@@ -123,7 +123,30 @@ function renderLive(){
         </div>
         <div id="board"><div style="color:var(--mute);font-size:14px;padding:10px 4px;">Waiting for students to join…</div></div>
       </div>
-    </div>`;
+    </div>
+    ${BRIEFING ? `
+    <div class="card" style="margin-top:24px;border-color:rgba(193,83,45,.35);">
+      <div style="font-size:11px;color:${GOLD};font-weight:800;letter-spacing:1.5px;margin-bottom:6px;">CASE BRIEFING — read this to the class</div>
+      <div style="font-family:Georgia,serif;font-size:22px;font-weight:800;color:#fff;margin-bottom:8px;">${esc(BRIEFING.headline)}</div>
+      <div style="font-size:15px;color:#cfc9da;line-height:1.6;margin-bottom:14px;">${esc(BRIEFING.lede)}</div>
+      ${BRIEFING.timeline ? `<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+        ${BRIEFING.timeline.map(t=>`<div style="flex:1;min-width:160px;background:rgba(193,83,45,.1);border:1px solid rgba(193,83,45,.3);border-radius:10px;padding:10px 12px;">
+          <div style="font-family:Georgia,serif;font-size:20px;font-weight:800;color:${RUST};">${esc(t.time)}</div>
+          <div style="font-size:12px;color:#cfc9da;line-height:1.4;margin-top:3px;">${esc(t.event)}</div>
+        </div>`).join("")}
+      </div>` : ""}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+        <div>
+          <div style="font-size:11px;color:${GOLD};font-weight:700;letter-spacing:1px;margin-bottom:6px;">THE OFFICIAL ACCOUNT</div>
+          ${BRIEFING.whatWeKnow.map(x=>`<div style="font-size:13.5px;color:#d8d3e4;line-height:1.5;margin-bottom:7px;">• ${esc(x)}</div>`).join("")}
+          <div style="font-size:13.5px;color:#f0d8ce;line-height:1.55;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.1);"><b style="color:#fff;">Your job: </b>${esc(BRIEFING.yourJob)}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:${GOLD};font-weight:700;letter-spacing:1px;margin-bottom:6px;">THE FOUR WITNESSES</div>
+          ${BRIEFING.cast.map(c=>`<div style="margin-bottom:9px;"><div style="font-size:14px;font-weight:700;color:#fff;">${esc(c.name)}</div><div style="font-size:12.5px;color:#a9a3b8;line-height:1.4;">${esc(c.role)}</div></div>`).join("")}
+        </div>
+      </div>
+    </div>` : ""}`;
   QRCode.toCanvas(document.getElementById("qr"), joinURL(), {width:260,margin:1,color:{dark:"#672E8D",light:"#ffffff"}});
   refresh();
 }
