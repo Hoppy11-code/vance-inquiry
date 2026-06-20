@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Vance Inquiry — Samiad</title>
+<style>
+  :root{
+    --purple:#672E8D; --gold:#A1916A; --rust:#c1532d;
+    --panel:#15131c; --panel2:#1d1a26; --ink:#ece9f2; --mute:#9a93a8;
+    --good:#46b86a; --goodglow:#7ee0a0;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#08070c;font-family:Aptos,Calibri,Arial,sans-serif;color:var(--ink);}
+  .shell{max-width:1080px;margin:0 auto;background:radial-gradient(circle at 50% -10%,#2a1830 0%,#0d0b12 60%);min-height:100vh;}
+  .band{background:linear-gradient(90deg,var(--purple) 0%,#3f1c57 100%);padding:16px 26px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--gold);}
+  .band .t{font-weight:800;font-size:15px;let-spacing:2px;letter-spacing:2px;}
+  .band .r{font-size:12px;color:var(--gold);letter-spacing:1px;}
+  .wrap{padding:30px 36px;}
+  .narrow{max-width:760px;margin:0 auto;}
+  button{font-family:inherit;border:none;border-radius:9px;font-weight:700;cursor:pointer;}
+  .btn-rust{background:var(--rust);color:#fff;padding:12px 22px;font-size:15px;}
+  .btn-purple{background:var(--purple);color:#fff;padding:12px 22px;font-size:15px;}
+  .btn-ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3);padding:11px 20px;font-size:14px;}
+  .btn-gold{background:var(--gold);color:#1a1320;padding:12px 22px;font-size:15px;}
+  .btn-gold:disabled,.btn-rust:disabled,.btn-purple:disabled{opacity:.45;cursor:default;}
+  h1.title{font-family:Georgia,serif;font-size:40px;font-weight:800;color:#fff;line-height:1.05;margin:0;letter-spacing:-.5px;}
+  .sub{color:var(--rust);font-weight:700;letter-spacing:2px;margin-top:8px;font-size:13px;}
+  .body-copy{font-size:16px;line-height:1.65;margin-top:22px;color:#cfc9da;}
+  .card{background:var(--panel);border-radius:12px;padding:18px 20px;border:1px solid rgba(161,145,106,.3);}
+  .label-gold{color:var(--gold);font-weight:800;font-size:12px;letter-spacing:1.5px;}
+  /* hub grid */
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+  .wcard{background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:18px 20px;cursor:pointer;transition:transform .1s;}
+  .wcard:hover{transform:translateY(-2px);}
+  .wcard.done{border-color:rgba(70,184,106,.5);}
+  .avatar{width:52px;height:52px;border-radius:12px;background:var(--panel2);display:flex;align-items:center;justify-content:center;font-size:26px;}
+  .chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;}
+  .chip{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:700;background:rgba(255,255,255,.05);color:#6b6577;border:1px solid rgba(255,255,255,.08);}
+  .chip.have{background:rgba(70,184,106,.18);color:var(--goodglow);border-color:rgba(70,184,106,.5);}
+  /* interview */
+  .strip{padding:12px 22px;background:var(--panel2);border-bottom:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;}
+  .transcript{height:380px;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:14px;}
+  .msg{max-width:78%;}
+  .msg.you{align-self:flex-end;}
+  .msg.them{align-self:flex-start;}
+  .who{font-size:10.5px;font-weight:700;margin-bottom:3px;letter-spacing:.5px;}
+  .bubble{padding:11px 15px;border-radius:12px;font-size:14.5px;line-height:1.55;}
+  .bubble.you{background:var(--purple);border-bottom-right-radius:3px;}
+  .bubble.them{background:var(--panel);border:1px solid rgba(255,255,255,.07);border-bottom-left-radius:3px;}
+  .unlock{font-size:12px;color:var(--goodglow);font-weight:700;background:rgba(70,184,106,.12);border:1px solid rgba(70,184,106,.4);border-radius:8px;padding:5px 10px;margin-top:5px;}
+  .inrow{padding:12px 22px 0;display:flex;gap:10px;}
+  input.ask{flex:1;padding:13px 16px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:var(--panel);color:#fff;font-size:14.5px;font-family:inherit;outline:none;}
+  .rapport{width:90px;height:7px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden;}
+  .rapport > div{height:100%;transition:width .4s;}
+  .bar-wrap{display:flex;align-items:center;gap:8px;min-width:160px;}
+  /* debrief */
+  .score-ring{width:92px;height:92px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;}
+  .didwell{background:rgba(70,184,106,.08);border:1px solid rgba(70,184,106,.3);border-radius:12px;padding:16px 20px;margin-bottom:14px;}
+  .improve{background:rgba(193,83,45,.08);border:1px solid rgba(193,83,45,.3);border-radius:12px;padding:16px 20px;}
+  .seg{display:inline-flex;border:1px solid rgba(255,255,255,.15);border-radius:10px;overflow:hidden;margin:0 4px;}
+  .seg button{background:transparent;color:#fff;padding:9px 16px;font-size:14px;}
+  .seg button.on{background:var(--gold);color:#1a1320;}
+  a.link{color:var(--gold);}
+  details summary{cursor:pointer;}
+  .err{color:var(--rust);font-size:13px;padding:0 24px 8px;}
+  @media(max-width:640px){.grid{grid-template-columns:1fr;}.wrap{padding:22px 18px;}h1.title{font-size:30px;}}
+</style>
+</head>
+<body>
+<div class="shell" id="root"></div>
+
+<script>
+// ============================================================
+// CONFIG — the app is served by the session server, so the API
+// is just this origin. Students arrive via the QR link, which
+// carries ?code=XXXX. Difficulty comes from the session.
+// ============================================================
+const params = new URLSearchParams(location.search);
+const API_BASE = (params.get("api") || location.origin).replace(/\/$/,"");
+let DIFFICULTY = "intermediate"; // set by the session on join
+
+const PURPLE="#672E8D", GOLD="#A1916A", RUST="#c1532d", GOOD="#46b86a", GOODGLOW="#7ee0a0";
+
+let WITNESSES = [];
+let DIFFS = {};
+let TOTAL_INTEL = 0;
+let LOCK_MIN_INTEL = 12;
+let LOCK_ALL_WITNESSES = true;
+
+// session
+let SESSION = { code: params.get("code") || "", token: null, name: "", locked: false };
+
+// per-witness state
+let state = {}; // id -> {history:[], trust, unlocked:[], labels:{}, started}
+let active = null;
+let lastDebrief = null;
+
+const root = document.getElementById("root");
+const esc = (s)=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+async function boot(){
+  try{
+    const r = await fetch(API_BASE+"/api/witnesses");
+    const d = await r.json();
+    WITNESSES = d.witnesses; DIFFS = d.difficulties;
+    TOTAL_INTEL = d.totalIntel || WITNESSES.reduce((s,w)=>s+w.intel.length,0);
+    LOCK_MIN_INTEL = d.lockMinIntel || 12;
+    LOCK_ALL_WITNESSES = d.lockRequireAllWitnesses !== false;
+    WITNESSES.forEach(w=> state[w.id] = {history:[],trust:w.startTrust,unlocked:[],labels:{},started:false,interviewed:false});
+    renderJoin();
+  }catch(e){
+    root.innerHTML = `<div class="wrap narrow"><div class="card"><b style="color:#fff">Can't reach the inquiry server.</b><div class="body-copy">Check the link your teacher gave you is correct and you're online. (Server: ${esc(API_BASE)})</div></div></div>`;
+  }
+}
+
+function totalUnlocked(){ return Object.values(state).reduce((s,o)=>s+o.unlocked.length,0); }
+
+// ---------------- JOIN ----------------
+function renderJoin(){
+  root.innerHTML = band("JOIN THE INQUIRY") + `
+  <div class="wrap narrow">
+    <h1 class="title">The Vance Inquiry</h1>
+    <div class="sub">AIRLOCK 3 · ARES III · MARS</div>
+    <div class="body-copy" style="margin-top:18px;">A geologist is dead on the Mars base. One of four people killed her. You've been sent to find out who. Enter your name and your class code to begin.</div>
+    <div class="card" style="margin-top:24px;border-color:rgba(255,255,255,.12);">
+      <label style="font-size:12px;color:${GOLD};font-weight:700;letter-spacing:1px;">YOUR NAME</label>
+      <input id="j-name" class="ask" style="width:100%;margin-top:6px;" placeholder="e.g. Maria" maxlength="24" autocomplete="off"/>
+      <label style="font-size:12px;color:${GOLD};font-weight:700;letter-spacing:1px;display:block;margin-top:16px;">CLASS CODE</label>
+      <input id="j-code" class="ask" style="width:100%;margin-top:6px;text-transform:uppercase;letter-spacing:4px;font-weight:800;" placeholder="ABCD" maxlength="4" value="${esc(SESSION.code)}" autocomplete="off"/>
+      <div id="j-err" class="err" style="display:none;position:static;padding:8px 0 0;"></div>
+      <div style="margin-top:20px;"><button class="btn-rust" id="j-btn" onclick="doJoin()">Begin the inquiry →</button></div>
+    </div>
+    <div style="margin-top:16px;font-size:12px;color:var(--mute);">No account or login needed.</div>
+  </div>`;
+  const n=document.getElementById("j-name"); if(n) n.focus();
+  document.getElementById("j-code").addEventListener("input",e=>e.target.value=e.target.value.toUpperCase());
+}
+
+async function doJoin(){
+  const name = document.getElementById("j-name").value.trim();
+  const code = document.getElementById("j-code").value.trim().toUpperCase();
+  const err = document.getElementById("j-err");
+  err.style.display="none";
+  if(!name){ err.textContent="Enter your name."; err.style.display="block"; return; }
+  if(code.length!==4){ err.textContent="Enter the 4-letter class code."; err.style.display="block"; return; }
+  document.getElementById("j-btn").disabled=true;
+  try{
+    const r = await fetch(API_BASE+"/api/session/join",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code,name})});
+    const d = await r.json();
+    if(!r.ok){ err.textContent=d.error||"Couldn't join."; err.style.display="block"; document.getElementById("j-btn").disabled=false; return; }
+    SESSION.code=code; SESSION.token=d.token; SESSION.name=d.name; DIFFICULTY=d.difficulty;
+    renderIntro();
+  }catch(e){ err.textContent="Couldn't reach the server. Try again."; err.style.display="block"; document.getElementById("j-btn").disabled=false; }
+}
+
+// report intel progress to the live scoreboard (fire and forget)
+function reportProgress(){
+  if(!SESSION.token) return;
+  fetch(API_BASE+"/api/session/progress",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code:SESSION.code,token:SESSION.token,intelCount:totalUnlocked()})}).catch(()=>{});
+}
+
+function band(right){
+  return `<div class="band"><div class="t">THE VANCE INQUIRY</div><div class="r">${right||"CLASSIFIED — INVESTIGATOR EYES ONLY"}</div></div>`;
+}
+
+function chips(w){
+  return `<div class="chips">${w.intel.map(it=>{
+    const have = state[w.id].unlocked.includes(it.id);
+    const lbl = state[w.id].labels[it.id];
+    return `<span class="chip ${have?'have':''}" title="${esc(have&&lbl?lbl:'Not yet uncovered')}">${have&&lbl?'✓ '+esc(lbl):'• locked'}</span>`;
+  }).join("")}</div>`;
+}
+
+// ---------------- INTRO ----------------
+function renderIntro(){
+  root.innerHTML = band("CLASSIFIED — INVESTIGATOR EYES ONLY") + `
+  <div class="wrap narrow">
+    <h1 class="title">The Vance Inquiry</h1>
+    <div class="sub">AIRLOCK 3 · ARES III · MARS</div>
+    <div class="body-copy">
+      Forty hours ago, Dr Elin Vance — the mission's lead geologist — was found dead in Airlock 3. The official line is an accident: a safety fault, a decompression, a tragedy.<br><br>
+      Earth Command isn't satisfied. They've sent <b style="color:#fff">you</b>.<br><br>
+      Four people on this base know more than they're saying. One of them killed her. Interview all four, earn what they know, and work out what really happened. Nobody will hand you the truth. Ask the right questions, listen hard, follow up on what slips out, and know when to push and when to ease off.
+    </div>
+    <div class="card" style="margin-top:24px;">
+      <div class="label-gold" style="margin-bottom:10px;">HOW THE INQUIRY WORKS</div>
+      <div style="font-size:13.5px;line-height:1.7;color:#c7c2d4;">
+        • Each witness is hiding <b style="color:#fff">4 pieces of intel</b>. They reveal them only when you earn trust and ask well.<br>
+        • The tracker shows what you've uncovered from each person, and your case total out of ${TOTAL_INTEL}.<br>
+        • Press too hard, accuse without proof, or ask vague questions and they'll close up. Build rapport and judge the moment.<br>
+        • When you leave a witness you get a <b style="color:#fff">coaching debrief</b>, then you can go back in and try again. You keep everything you've already uncovered.
+      </div>
+    </div>
+    <div style="margin-top:18px;font-size:13px;color:var(--mute);">Investigator: <b style="color:#fff">${esc(SESSION.name)}</b> · Difficulty: <b style="color:#fff">${esc((DIFFS[DIFFICULTY]||{}).label||DIFFICULTY)}</b></div>
+    <div style="margin-top:22px;text-align:center;">
+      <button class="btn-rust" onclick="renderHub()">Begin the inquiry →</button>
+    </div>
+  </div>`;
+}
+
+// ---------------- HUB ----------------
+function interviewedCount(){ return WITNESSES.filter(w=>state[w.id].interviewed).length; }
+function canLock(){ return totalUnlocked()>=LOCK_MIN_INTEL && (!LOCK_ALL_WITNESSES || interviewedCount()>=WITNESSES.length); }
+function lockBlockerText(){
+  const tu=totalUnlocked(), ic=interviewedCount();
+  const bits=[];
+  if(tu<LOCK_MIN_INTEL) bits.push(`${LOCK_MIN_INTEL-tu} more clue${(LOCK_MIN_INTEL-tu)===1?'':'s'} needed`);
+  if(LOCK_ALL_WITNESSES && ic<WITNESSES.length){ const m=WITNESSES.filter(w=>!state[w.id].interviewed).map(w=>w.name.split(" ").slice(-1)[0]); bits.push(`interview ${m.join(", ")}`); }
+  return bits.join("  ·  ");
+}
+
+function renderHub(){
+  const tu = totalUnlocked();
+  const ready = canLock();
+  root.innerHTML = band(`CASE FILE &nbsp; <b style="color:${tu>=TOTAL_INTEL?GOODGLOW:'#fff'}">${tu} / ${TOTAL_INTEL}</b>`) + `
+  <div class="wrap">
+    <div style="font-size:15px;color:#cfc9da;margin-bottom:8px;line-height:1.6;">Four witnesses. Choose who to interview. Return to anyone as often as you like — what you've uncovered stays in your file.</div>
+    <div style="font-size:13px;color:var(--mute);margin-bottom:20px;">To accuse, uncover at least <b style="color:#fff">${LOCK_MIN_INTEL} of ${TOTAL_INTEL}</b> clues${LOCK_ALL_WITNESSES?` and <b style="color:#fff">interview all four witnesses</b>`:''}.</div>
+    <div class="grid">
+      ${WITNESSES.map(w=>{
+        const st = state[w.id];
+        const full = st.unlocked.length===w.intel.length;
+        return `<div class="wcard ${full?'done':''}" onclick="openWitness('${w.id}')">
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div class="avatar" style="border:2px solid ${w.accent}">${w.avatar}</div>
+            <div style="flex:1;">
+              <div style="font-weight:800;font-size:17px;color:#fff;">${esc(w.name)}</div>
+              <div style="font-size:12.5px;color:${w.accent};font-weight:700;">${esc(w.role)}${w.isSuspect?' · person of interest':''}</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:12px;font-weight:800;color:${full?GOODGLOW:'#9a93a8'}">${st.unlocked.length}/${w.intel.length}</div>
+              <div style="font-size:10px;font-weight:700;color:${st.interviewed?GOODGLOW:'#6b6577'};margin-top:2px;">${st.interviewed?'✓ interviewed':'not yet'}</div>
+            </div>
+          </div>
+          <div style="font-size:12.5px;color:#a9a3b8;margin-top:10px;line-height:1.45;font-style:italic;">${esc(w.blurb)}</div>
+          ${chips(w)}
+          <div style="margin-top:12px;font-size:12.5px;font-weight:700;color:${w.accent}">${st.started?'Re-interview →':'Interview →'}</div>
+        </div>`;
+      }).join("")}
+    </div>
+    <div style="margin-top:24px;text-align:center;">
+      ${SESSION.locked
+        ? `<div class="card" style="display:inline-block;border-color:rgba(70,184,106,.4);"><b style="color:${GOODGLOW}">✓ Your verdict is locked in.</b><div style="font-size:13px;color:var(--mute);margin-top:4px;">Wait for your teacher to reveal the result on the board.</div></div>`
+        : ready
+          ? `<button class="btn-gold" onclick="renderLockIn()">Name the killer & lock in →</button>`
+          : `<button class="btn-gold" disabled style="opacity:.45;">Accuse — ${esc(lockBlockerText())}</button>`}
+    </div>
+  </div>`;
+}
+
+// ---------------- INTERVIEW ----------------
+function openWitness(id){
+  active = id;
+  const w = WITNESSES.find(x=>x.id===id);
+  if(state[id].history.length===0){ state[id].history.push({role:"witness",text:w.opening}); state[id].started=true; }
+  renderInterview();
+}
+
+function renderInterview(){
+  const w = WITNESSES.find(x=>x.id===active);
+  const st = state[active];
+  const qCount = st.history.filter(m=>m.role==="you").length;
+  const tcolor = st.trust>60?GOOD:st.trust>30?GOLD:RUST;
+  root.innerHTML = `
+  <div class="band">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="btn-ghost" style="padding:7px 14px;font-size:13px;" onclick="renderHub()">← Case file</button>
+      <div>
+        <div style="font-weight:800;font-size:16px;color:#fff;">${w.avatar} ${esc(w.name)}</div>
+        <div style="font-size:11.5px;color:${w.accent};font-weight:700;">${esc(w.role)}${w.isSuspect?' · person of interest':''}</div>
+      </div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:10.5px;color:${GOLD};letter-spacing:1px;">INTEL FROM THIS WITNESS</div>
+      <div style="font-weight:800;font-size:18px;color:${st.unlocked.length===w.intel.length?GOODGLOW:'#fff'}">${st.unlocked.length} / ${w.intel.length}</div>
+    </div>
+  </div>
+  <div class="strip">
+    ${chips(w)}
+    <div class="bar-wrap"><span style="font-size:10.5px;color:#9a93a8;font-weight:700;letter-spacing:.5px;">RAPPORT</span>
+      <div class="rapport"><div style="width:${st.trust}%;background:${tcolor};"></div></div></div>
+  </div>
+  <div class="transcript" id="tr">
+    ${st.history.map(m=>messageHTML(w,m)).join("")}
+    <div id="thinking" style="display:none;align-self:flex-start;font-size:13px;color:#9a93a8;font-style:italic;">${esc(w.name)} considers your question…</div>
+  </div>
+  <div class="err" id="err" style="display:none;"></div>
+  <div class="inrow">
+    <input class="ask" id="ask" placeholder="Ask ${esc(w.name.split(' ')[0])} a question…" onkeydown="if(event.key==='Enter')send()" autocomplete="off"/>
+    <button class="btn-purple" id="sendbtn" onclick="send()">Ask</button>
+  </div>
+  <div class="inrow" style="justify-content:space-between;align-items:center;">
+    <div style="font-size:11.5px;color:#9a93a8;">${qCount} question${qCount===1?'':'s'} asked</div>
+    <button class="btn-ghost" style="border-color:${GOLD};color:${GOLD};font-size:13px;${qCount<2?'opacity:.4;':''}" ${qCount<2?'disabled':''} onclick="runDebrief()">End interview & get debrief →</button>
+  </div>`;
+  const tr = document.getElementById("tr"); tr.scrollTop = tr.scrollHeight;
+  const ask = document.getElementById("ask"); if(ask) ask.focus();
+}
+
+function messageHTML(w,m){
+  const you = m.role==="you";
+  let html = `<div class="msg ${you?'you':'them'}">
+    <div class="who" style="color:${you?GOLD:w.accent};text-align:${you?'right':'left'}">${you?'YOU':esc(w.name.toUpperCase())}</div>
+    <div class="bubble ${you?'you':'them'}">${esc(m.text)}</div>`;
+  if(m.justUnlocked && m.justUnlocked.length){
+    html += m.justUnlocked.map(id=>{ const lbl=state[w.id].labels[id]; return `<div class="unlock">🔓 Intel uncovered: ${esc(lbl||'new lead')}</div>`;}).join("");
+  }
+  html += `</div>`;
+  return html;
+}
+
+async function send(){
+  const ask = document.getElementById("ask");
+  const msg = ask.value.trim();
+  if(!msg) return;
+  const st = state[active];
+  ask.value=""; ask.disabled=true;
+  document.getElementById("sendbtn").disabled=true;
+  document.getElementById("err").style.display="none";
+  st.history.push({role:"you",text:msg});
+  st.interviewed = true;
+  renderInterviewBody();
+  document.getElementById("thinking").style.display="block";
+  const tr=document.getElementById("tr"); tr.scrollTop=tr.scrollHeight;
+  try{
+    const r = await fetch(API_BASE+"/api/interview",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({witnessId:active,history:st.history,trust:st.trust,unlockedIds:st.unlocked,difficulty:DIFFICULTY})});
+    if(!r.ok) throw new Error("bad");
+    const out = await r.json();
+    st.trust = Math.max(0,Math.min(100,st.trust+(out.trustDelta||0)));
+    const fresh = (out.unlocked||[]).filter(id=>!st.unlocked.includes(id));
+    st.unlocked.push(...fresh);
+    (out.unlockedDetail||[]).forEach(u=>{ if(u&&u.id&&u.label) st.labels[u.id]=u.label; });
+    st.history.push({role:"witness",text:out.reply,justUnlocked:fresh});
+    if(fresh.length) reportProgress();
+    renderInterview();
+  }catch(e){
+    const err=document.getElementById("err"); err.style.display="block"; err.textContent="The connection to the base dropped. Try sending that again.";
+    document.getElementById("thinking").style.display="none";
+    ask.disabled=false; document.getElementById("sendbtn").disabled=false; ask.focus();
+  }
+}
+
+// light re-render of just the transcript while waiting (keeps input row stable)
+function renderInterviewBody(){
+  const w = WITNESSES.find(x=>x.id===active);
+  const st = state[active];
+  const tr = document.getElementById("tr");
+  tr.innerHTML = st.history.map(m=>messageHTML(w,m)).join("") + `<div id="thinking" style="display:block;align-self:flex-start;font-size:13px;color:#9a93a8;font-style:italic;">${esc(w.name)} considers your question…</div>`;
+  tr.scrollTop = tr.scrollHeight;
+}
+
+async function runDebrief(){
+  const w = WITNESSES.find(x=>x.id===active);
+  const st = state[active];
+  root.innerHTML = band("COACHING") + `<div class="wrap narrow"><div class="card" style="border-color:rgba(255,255,255,.1)"><div class="body-copy" style="margin-top:0">Reviewing your interview with ${esc(w.name)}…</div></div></div>`;
+  try{
+    const r = await fetch(API_BASE+"/api/debrief",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({witnessId:active,history:st.history,unlockedIds:st.unlocked,difficulty:DIFFICULTY})});
+    lastDebrief = await r.json();
+    renderDebrief();
+  }catch(e){
+    root.innerHTML = band("COACHING") + `<div class="wrap narrow"><div class="err" style="display:block">Could not generate the debrief.</div><button class="btn-ghost" onclick="renderInterview()">← Back</button></div>`;
+  }
+}
+
+function renderDebrief(){
+  const w = WITNESSES.find(x=>x.id===active);
+  const st = state[active];
+  const d = lastDebrief;
+  const ring = d.score>=70?GOOD:d.score>=45?GOLD:RUST;
+  root.innerHTML = band("INTERVIEW DEBRIEF · "+esc(w.name.toUpperCase())) + `
+  <div class="wrap narrow">
+    <div style="display:flex;align-items:center;gap:22px;margin-bottom:22px;">
+      <div class="score-ring" style="border:4px solid ${ring}">
+        <div style="font-weight:800;font-size:30px;color:#fff;">${esc(d.score)}</div>
+        <div style="font-size:9px;color:#9a93a8;letter-spacing:1px;">/ 100</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:${GOLD};font-weight:700;letter-spacing:1.5px;">VERDICT</div>
+        <div style="font-size:17px;color:#fff;line-height:1.4;font-weight:600;margin-top:4px;">${esc(d.verdict)}</div>
+        <div style="font-size:13px;color:#9a93a8;margin-top:8px;">You uncovered <b style="color:${GOODGLOW}">${st.unlocked.length} of ${w.intel.length}</b> secrets from this witness.</div>
+      </div>
+    </div>
+    <div class="didwell">
+      <div style="color:${GOODGLOW};font-weight:800;font-size:12px;letter-spacing:1px;margin-bottom:8px;">WHAT YOU DID WELL</div>
+      ${(d.didWell||[]).map(x=>`<div style="font-size:14px;color:#d6ecda;line-height:1.55;margin-bottom:6px;">✓ ${esc(x)}</div>`).join("")}
+    </div>
+    <div class="improve">
+      <div style="color:${RUST};font-weight:800;font-size:12px;letter-spacing:1px;margin-bottom:8px;">HOW TO GET MORE NEXT TIME</div>
+      ${(d.improve||[]).map(x=>`<div style="font-size:14px;color:#f0d8ce;line-height:1.55;margin-bottom:6px;">→ ${esc(x)}</div>`).join("")}
+    </div>
+    <div style="display:flex;gap:12px;margin-top:26px;justify-content:center;">
+      <button class="btn-rust" onclick="renderInterview()">↩ Go back in and re-interview</button>
+      <button class="btn-ghost" onclick="renderHub()">Return to case file</button>
+    </div>
+  </div>`;
+}
+
+// ---------------- LOCK IN ----------------
+let pendingAccusation = null;
+function renderLockIn(){
+  const tu = totalUnlocked();
+  pendingAccusation = null;
+  root.innerHTML = band(`<b style="color:${tu>=TOTAL_INTEL?GOODGLOW:'#fff'}">${tu} / ${TOTAL_INTEL}</b>`) + `
+  <div class="wrap narrow">
+    <div style="font-family:Georgia,serif;font-size:26px;font-weight:800;color:#fff;margin-bottom:6px;">Name the killer</div>
+    <div style="font-size:14.5px;color:#cfc9da;line-height:1.6;margin-bottom:6px;">This is your final answer to Earth Command. Choose the person you believe killed Dr Vance. <b style="color:#fff">You can only lock in once.</b></div>
+    <div style="font-size:13px;color:var(--mute);margin-bottom:18px;">You've uncovered ${tu} of ${TOTAL_INTEL} pieces of intel. Your teacher will reveal the result on the board.</div>
+    <div class="grid" id="accuse">
+      ${WITNESSES.map(w=>`
+        <div class="wcard" data-id="${w.id}" onclick="pickAccused('${w.id}')" style="cursor:pointer;">
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div class="avatar" style="border:2px solid ${w.accent}">${w.avatar}</div>
+            <div style="flex:1;"><div style="font-weight:800;font-size:17px;color:#fff;">${esc(w.name)}</div>
+            <div style="font-size:12.5px;color:${w.accent};font-weight:700;">${esc(w.role)}</div></div>
+            <div class="tick" style="font-size:22px;color:${GOODGLOW};opacity:0;">✓</div>
+          </div>
+        </div>`).join("")}
+    </div>
+    <div id="lock-err" class="err" style="display:none;position:static;padding:10px 0 0;"></div>
+    <div style="margin-top:24px;display:flex;gap:12px;justify-content:center;">
+      <button class="btn-gold" id="lock-btn" onclick="confirmLock()" disabled style="opacity:.45;">Lock in my verdict</button>
+      <button class="btn-ghost" onclick="renderHub()">← Keep investigating</button>
+    </div>
+  </div>`;
+}
+function pickAccused(id){
+  pendingAccusation = id;
+  document.querySelectorAll("#accuse .wcard").forEach(c=>{
+    const on = c.getAttribute("data-id")===id;
+    c.style.borderColor = on ? GOODGLOW : "rgba(255,255,255,.08)";
+    c.style.background = on ? "rgba(70,184,106,.1)" : "var(--panel)";
+    c.querySelector(".tick").style.opacity = on ? 1 : 0;
+  });
+  const b=document.getElementById("lock-btn"); b.disabled=false; b.style.opacity=1;
+}
+async function confirmLock(){
+  if(!pendingAccusation) return;
+  const w = WITNESSES.find(x=>x.id===pendingAccusation);
+  if(!confirm(`Lock in ${w.name} as the killer? This is final and can't be changed.`)) return;
+  const b=document.getElementById("lock-btn"); b.disabled=true; b.style.opacity=.5; b.textContent="Locking in…";
+  const interviewed = WITNESSES.filter(x=>state[x.id].interviewed).map(x=>x.id);
+  try{
+    const r = await fetch(API_BASE+"/api/session/lock",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({code:SESSION.code,token:SESSION.token,verdict:pendingAccusation,intelCount:totalUnlocked(),interviewed})});
+    const d = await r.json();
+    if(!r.ok && d.error!=="already_locked"){
+      const e=document.getElementById("lock-err"); e.textContent=d.message||d.error||"Couldn't lock in."; e.style.display="block";
+      b.disabled=false; b.style.opacity=1; b.textContent="Lock in my verdict"; return;
+    }
+    SESSION.locked = true;
+    renderLocked(w);
+  }catch(e){ const el=document.getElementById("lock-err"); el.textContent="Couldn't reach the server. Try again."; el.style.display="block"; b.disabled=false; b.style.opacity=1; b.textContent="Lock in my verdict"; }
+}
+function renderLocked(w){
+  root.innerHTML = band("VERDICT LOCKED") + `
+  <div class="wrap narrow" style="text-align:center;">
+    <div style="font-size:54px;margin-top:20px;">${w.avatar}</div>
+    <h1 class="title" style="font-size:30px;margin-top:10px;">Verdict locked in</h1>
+    <div style="font-size:16px;color:#cfc9da;margin-top:12px;">You've accused <b style="color:#fff">${esc(w.name)}</b> of killing Dr Vance.</div>
+    <div class="card" style="margin-top:24px;display:inline-block;border-color:rgba(70,184,106,.4);">
+      <div style="font-size:14px;color:${GOODGLOW};font-weight:700;">Your answer is final.</div>
+      <div style="font-size:13px;color:var(--mute);margin-top:6px;">Watch the board — your teacher will reveal who really did it.</div>
+    </div>
+    <div style="margin-top:22px;"><button class="btn-ghost" onclick="renderHub()">Review your case file</button></div>
+  </div>`;
+}
+
+boot();
+</script>
+</body>
+</html>
