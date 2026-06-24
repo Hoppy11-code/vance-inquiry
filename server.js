@@ -25,7 +25,7 @@ app.use(cors());
 app.use(express.json({ limit: "1mb" }));
 
 const API_KEY = process.env.ANTHROPIC_API_KEY;
-const MODEL = process.env.MODEL || "claude-sonnet-4-20250514";
+const MODEL = process.env.MODEL || "claude-sonnet-4-6";
 const PORT = process.env.PORT || 8787;
 const KILLER_ID = "reeve";
 const TOTAL_INTEL = WITNESSES.reduce((s, w) => s + w.intel.length, 0);
