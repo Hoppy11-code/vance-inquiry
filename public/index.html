@@ -438,23 +438,40 @@ function pickAccused(id){
   });
   const b=document.getElementById("lock-btn"); b.disabled=false; b.style.opacity=1;
 }
-async function confirmLock(){
+function confirmLock(){
   if(!pendingAccusation) return;
   const w = WITNESSES.find(x=>x.id===pendingAccusation);
-  if(!confirm(`Lock in ${w.name} as the killer? This is final and can't be changed.`)) return;
-  const b=document.getElementById("lock-btn"); b.disabled=true; b.style.opacity=.5; b.textContent="Locking in…";
+  // styled confirmation modal (replaces browser confirm)
+  const ov=document.createElement("div");
+  ov.id="confirm-ov";
+  ov.style.cssText="position:fixed;inset:0;background:rgba(5,4,8,.82);z-index:60;display:flex;align-items:center;justify-content:center;padding:20px;";
+  ov.innerHTML=`<div style="max-width:440px;width:100%;background:var(--panel2);border:1px solid ${GOLD};border-radius:16px;padding:26px 28px;text-align:center;">
+    <div style="font-size:46px;margin-bottom:10px;">${w.avatar}</div>
+    <div style="font-family:Georgia,serif;font-size:22px;font-weight:800;color:#fff;margin-bottom:8px;">Accuse ${esc(w.name)}?</div>
+    <div style="font-size:14.5px;color:#cfc9da;line-height:1.55;margin-bottom:22px;">This is your final answer to Earth Command. It cannot be changed once locked.</div>
+    <div style="display:flex;gap:12px;justify-content:center;">
+      <button class="btn-gold" onclick="doLock()">Yes, lock it in</button>
+      <button class="btn-ghost" onclick="document.getElementById('confirm-ov').remove()">Cancel</button>
+    </div>
+  </div>`;
+  document.body.appendChild(ov);
+}
+async function doLock(){
+  const ov=document.getElementById("confirm-ov"); if(ov) ov.remove();
+  const w = WITNESSES.find(x=>x.id===pendingAccusation);
+  const b=document.getElementById("lock-btn"); if(b){ b.disabled=true; b.style.opacity=.5; b.textContent="Locking in…"; }
   const interviewed = WITNESSES.filter(x=>state[x.id].interviewed).map(x=>x.id);
   try{
     const r = await fetch(API_BASE+"/api/session/lock",{method:"POST",headers:{"Content-Type":"application/json"},
       body:JSON.stringify({code:SESSION.code,token:SESSION.token,verdict:pendingAccusation,intelCount:totalUnlocked(),interviewed})});
     const d = await r.json();
     if(!r.ok && d.error!=="already_locked"){
-      const e=document.getElementById("lock-err"); e.textContent=d.message||d.error||"Couldn't lock in."; e.style.display="block";
-      b.disabled=false; b.style.opacity=1; b.textContent="Lock in my verdict"; return;
+      const e=document.getElementById("lock-err"); if(e){ e.textContent=d.message||d.error||"Couldn't lock in."; e.style.display="block"; }
+      if(b){ b.disabled=false; b.style.opacity=1; b.textContent="Lock in my verdict"; } return;
     }
     SESSION.locked = true;
     renderLocked(w);
-  }catch(e){ const el=document.getElementById("lock-err"); el.textContent="Couldn't reach the server. Try again."; el.style.display="block"; b.disabled=false; b.style.opacity=1; b.textContent="Lock in my verdict"; }
+  }catch(e){ const el=document.getElementById("lock-err"); if(el){ el.textContent="Couldn't reach the server. Try again."; el.style.display="block"; } if(b){ b.disabled=false; b.style.opacity=1; b.textContent="Lock in my verdict"; } }
 }
 function renderLocked(w){
   root.innerHTML = band("VERDICT LOCKED") + `
