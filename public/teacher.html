@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>The Vance Inquiry — Teacher Console</title>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js';document.head.appendChild(s);"></script>
 <style>
   :root{--purple:#672E8D;--gold:#A1916A;--rust:#c1532d;--panel:#15131c;--panel2:#1d1a26;--ink:#ece9f2;--mute:#9a93a8;--good:#46b86a;--goodglow:#7ee0a0;}
   *{box-sizing:border-box;}
@@ -85,13 +85,34 @@ function renderSetup(){
 }
 function pick(k){ chosen=k; document.querySelectorAll("#seg button").forEach(b=>b.classList.remove("on")); event.target.closest("button").classList.add("on"); }
 
+// styled in-app toast (replaces ugly browser alert)
+function toast(msg, kind){
+  const t=document.createElement("div");
+  const col = kind==="error" ? "#c1532d" : "#46b86a";
+  t.style.cssText=`position:fixed;left:50%;bottom:34px;transform:translateX(-50%);z-index:80;background:#1d1a26;color:#fff;border:1px solid ${col};border-left:5px solid ${col};border-radius:12px;padding:14px 22px;font-size:15px;font-family:inherit;box-shadow:0 10px 40px rgba(0,0,0,.5);max-width:520px;`;
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>{ t.style.transition="opacity .4s"; t.style.opacity="0"; setTimeout(()=>t.remove(),400); }, 3200);
+}
+
 async function createSession(){
-  try{
-    const r = await fetch(API_BASE+"/api/session/create",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({difficulty:chosen})});
-    session = await r.json(); lastClose=null;
-    renderLive();
-    pollTimer = setInterval(refresh, 2500);
-  }catch(e){ alert("Couldn't create the session. Is the server running?"); }
+  const btn = document.querySelector(".btn-rust");
+  if(btn){ btn.disabled=true; btn.textContent="Creating session…"; }
+  // quiet retry: the server may have just restarted; try a few times before complaining
+  for(let attempt=1; attempt<=4; attempt++){
+    try{
+      const r = await fetch(API_BASE+"/api/session/create",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({difficulty:chosen})});
+      if(!r.ok) throw new Error("bad status");
+      session = await r.json(); lastClose=null;
+      renderLive();
+      pollTimer = setInterval(refresh, 2500);
+      return;
+    }catch(e){
+      if(attempt<4){ await new Promise(res=>setTimeout(res, 1200)); continue; }
+      if(btn){ btn.disabled=false; btn.textContent="Create session & show QR →"; }
+      toast("Couldn't reach the server just now. Give it a moment and try again.", "error");
+    }
+  }
 }
 
 function joinURL(){ return API_BASE + "/?code=" + session.code; }
@@ -110,9 +131,11 @@ function renderLive(){
       <div>
         <div class="qrcard">
           <div style="font-size:13px;color:#555;font-weight:700;letter-spacing:1px;">SCAN TO JOIN</div>
-          <canvas id="qr"></canvas>
+          <div id="qrwrap" style="min-height:200px;display:flex;align-items:center;justify-content:center;"><canvas id="qr"></canvas></div>
+          <div style="font-size:12px;color:#888;margin:6px 0 2px;">or go to</div>
+          <div style="font-size:15px;color:#222;font-weight:700;">${esc(API_BASE.replace(/^https?:\/\//,""))}</div>
+          <div style="font-size:12px;color:#888;margin:10px 0 2px;">and enter code</div>
           <div class="code">${esc(session.code)}</div>
-          <div class="joinurl">${esc(joinURL())}</div>
         </div>
       </div>
       <div class="card">
@@ -147,8 +170,29 @@ function renderLive(){
         </div>
       </div>
     </div>` : ""}`;
-  QRCode.toCanvas(document.getElementById("qr"), joinURL(), {width:260,margin:1,color:{dark:"#672E8D",light:"#ffffff"}});
+  drawQR();
   refresh();
+}
+
+function drawQR(){
+  const wrap = document.getElementById("qrwrap");
+  const canvas = document.getElementById("qr");
+  if(!wrap || !canvas) return;
+  try{
+    if(typeof QRCode === "undefined" || !QRCode.toCanvas) throw new Error("no lib");
+    QRCode.toCanvas(canvas, joinURL(), {width:200,margin:1,color:{dark:"#672E8D",light:"#ffffff"}}, function(err){
+      if(err){ qrFallback(wrap); }
+    });
+  }catch(e){
+    qrFallback(wrap);
+  }
+}
+function qrFallback(wrap){
+  // No QR available (CDN blocked). Show clear text instructions instead of a blank box.
+  wrap.innerHTML = `<div style="text-align:center;padding:14px 8px;">
+    <div style="font-size:34px;margin-bottom:6px;">📱</div>
+    <div style="font-size:13px;color:#555;line-height:1.4;">On your phone, open<br><b style="color:#672E8D;">${esc(API_BASE.replace(/^https?:\/\//,""))}</b><br>and enter the code below.</div>
+  </div>`;
 }
 
 async function refresh(){
@@ -205,7 +249,7 @@ async function closeRound(){
         <div id="board"></div>
       </div>`;
     renderBoard(players, 16, false);
-  }catch(e){ alert("Couldn't close the round."); }
+  }catch(e){ toast("Couldn't close the round. Try again in a moment.", "error"); }
 }
 
 boot();
